@@ -22,7 +22,7 @@ router.post("/", middleware_1.authMiddleware, (req, res) => __awaiter(void 0, vo
     const parsedData = types_1.zapCreateSchema.safeParse(body);
     if (!parsedData.success) {
         return res.status(411).json({
-            message: "Incorrect inputs",
+            message: "Incorrect inputs"
         });
     }
     const zapId = yield db_1.prismaClient.$transaction((tx) => __awaiter(void 0, void 0, void 0, function* () {
@@ -34,52 +34,53 @@ router.post("/", middleware_1.authMiddleware, (req, res) => __awaiter(void 0, vo
                     create: parsedData.data.actions.map((x, index) => ({
                         actionId: x.availableActionId,
                         sortingOrder: index,
-                    })),
-                },
-            },
+                        metadata: x.actionMetadata
+                    }))
+                }
+            }
         });
         const trigger = yield tx.trigger.create({
             data: {
                 triggerId: parsedData.data.availableTriggerId,
                 zapId: zap.id,
-            },
+            }
         });
         yield tx.zap.update({
             where: {
-                id: zap.id,
+                id: zap.id
             },
             data: {
-                triggerId: trigger.id,
-            },
+                triggerId: trigger.id
+            }
         });
         return zap.id;
     }));
     return res.json({
-        zapId,
+        zapId
     });
 }));
 router.get("/", middleware_1.authMiddleware, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    //@ts-ignore
+    // @ts-ignore
     const id = req.id;
     const zaps = yield db_1.prismaClient.zap.findMany({
         where: {
-            userId: id,
+            userId: id
         },
         include: {
             actions: {
                 include: {
-                    type: true,
-                },
+                    type: true
+                }
             },
             trigger: {
                 include: {
-                    type: true,
-                },
-            },
-        },
+                    type: true
+                }
+            }
+        }
     });
     return res.json({
-        zaps,
+        zaps
     });
 }));
 router.get("/:zapId", middleware_1.authMiddleware, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -94,15 +95,15 @@ router.get("/:zapId", middleware_1.authMiddleware, (req, res) => __awaiter(void 
         include: {
             actions: {
                 include: {
-                    type: true,
-                },
+                    type: true
+                }
             },
             trigger: {
                 include: {
-                    type: true,
-                },
-            },
-        },
+                    type: true
+                }
+            }
+        }
     });
     return res.json({
         zap
